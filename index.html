@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teszt Webshop</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fb; color: #222; min-height: 100vh; }
+
+    nav {
+      background: #1a1a2e; color: #fff;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 2rem; height: 60px; position: sticky; top: 0; z-index: 100;
+    }
+    nav .logo { font-size: 1.3rem; font-weight: 700; }
+    nav #nav-user { font-size: 0.9rem; opacity: 0.85; }
+    nav button {
+      background: #e94560; color: #fff; border: none;
+      padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; margin-left: 1rem;
+    }
+    nav button:hover { background: #c73652; }
+
+    #auth-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center; z-index: 999;
+    }
+    #auth-overlay.hidden { display: none; }
+    .auth-box {
+      background: #fff; border-radius: 14px; padding: 2.5rem 2rem;
+      width: 100%; max-width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.18); text-align: center;
+    }
+    .auth-box h2 { margin-bottom: 1.5rem; font-size: 1.5rem; color: #1a1a2e; }
+    .auth-box input {
+      width: 100%; padding: 0.75rem 1rem; border: 1.5px solid #ddd;
+      border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; outline: none;
+    }
+    .auth-box input:focus { border-color: #e94560; }
+    .auth-box .btn-primary {
+      width: 100%; padding: 0.75rem; background: #e94560; color: #fff;
+      border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 600;
+    }
+    .auth-box .btn-primary:hover { background: #c73652; }
+    .auth-box .switch-link { margin-top: 1rem; font-size: 0.88rem; color: #777; }
+    .auth-box .switch-link span { color: #e94560; cursor: pointer; font-weight: 600; }
+    #auth-message { color: #e94560; font-size: 0.85rem; margin-top: 0.5rem; min-height: 1.2em; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: #fff; padding: 5rem 2rem; text-align: center;
+    }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { font-size: 1.1rem; opacity: 0.8; margin-bottom: 2rem; }
+    .hero .btn-hero {
+      background: #e94560; color: #fff; border: none;
+      padding: 0.8rem 2rem; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 600;
+    }
+
+    .products-section { padding: 3rem 2rem; max-width: 1100px; margin: 0 auto; }
+    .products-section h2 { font-size: 1.8rem; margin-bottom: 2rem; color: #1a1a2e; }
+    .product-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem;
+    }
+    .product-card {
+      background: #fff; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 6px 24px rgba(0,0,0,0.13); }
+    .product-card .card-img {
+      width: 100%; height: 180px; background: #f0f0f0;
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+    }
+    .product-card .card-body { padding: 1rem; }
+    .product-card .card-title { font-weight: 600; margin-bottom: 0.3rem; }
+    .product-card .card-price { color: #e94560; font-weight: 700; margin-bottom: 0.8rem; }
+    .product-card .btn-cart {
+      width: 100%; padding: 0.5rem; background: #1a1a2e; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s;
+    }
+    .product-card .btn-cart:hover { background: #e94560; }
+
+    #config-banner {
+      background: #fff3cd; border: 1.5px solid #ffc107; border-radius: 10px;
+      padding: 1.2rem 1.5rem; margin: 2rem auto; max-width: 800px; font-size: 0.93rem; line-height: 1.7;
+    }
+    #config-banner code { background: #eee; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: monospace; }
+    #config-banner.hidden { display: none; }
+
+    footer { background: #1a1a2e; color: #aaa; text-align: center; padding: 1.5rem; margin-top: 4rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<!--
+  ========================================
+  ⚙️  SUPABASE KONFIGURÁCIÓ – IDE KELL SZERKESZTENI
+  1. Menj a Supabase dashboardra: https://app.supabase.com
+  2. Projekt → Settings → API
+  3. Másold be a 'Project URL' és az 'anon public' API key értékét
+  ========================================
+-->
+<script>
+  const SUPABASE_URL = 'ILLESZD_BE_A_SUPABASE_URL_CIMET';   // pl. https://xyzxyz.supabase.co
+  const SUPABASE_ANON_KEY = 'ILLESZD_BE_AZ_ANON_KEY_KULCSOT'; // hosszú jwt token
+</script>
+
+<!-- Supabase JS SDK betöltése CDN-ről -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- NAVIGÁCIÓ -->
+<nav>
+  <div class="logo">💎 ÉkszerShop</div>
+  <div style="display:flex;align-items:center">
+    <span id="nav-user">Nem vagy bejelentkezve</span>
+    <button id="nav-btn" onclick="openAuth()">Bejelentkezés</button>
+  </div>
+</nav>
+
+<!-- BEJELENTKEZÉSI MODAL -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <h2 id="auth-title">Bejelentkezés</h2>
+    <input type="email" id="auth-email" placeholder="E-mail cím" />
+    <input type="password" id="auth-password" placeholder="Jelszó" />
+    <button class="btn-primary" id="auth-submit-btn" onclick="handleAuth()">Belépés</button>
+    <div id="auth-message"></div>
+    <div class="switch-link">
+      <span id="auth-switch-text">Nincs még fiókod?</span>
+      <span onclick="toggleAuthMode()">Regisztráció</span>
+    </div>
+    <div class="switch-link" style="margin-top:0.5rem">
+      <span onclick="closeAuth()" style="color:#aaa;cursor:pointer">✕ Bezárás</span>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Kézzel készített ékszerek ✨</h1>
+  <p>Egyedi darabok, melyek elmondják a te történeted</p>
+  <button class="btn-hero" onclick="document.querySelector('.products-section').scrollIntoView({behavior:'smooth'})">Böngészd a kollekciót</button>
+</section>
+
+<!-- CONFIG BANNER (csak amíg nincs beállítva a Supabase) -->
+<div id="config-banner">
+  ⚠️ <strong>Fejlesztői megjegyzés:</strong> A bejelentkezés működéséhez be kell állítanod a Supabase adataidat az
+  <code>index.html</code> fájl tetején (<code>SUPABASE_URL</code> és <code>SUPABASE_ANON_KEY</code> változók).
+  Olvasd el a <code>README.md</code> útmutatót a pontos lépésekért.
+</div>
+
+<!-- TERMÉKEK -->
+<section class="products-section">
+  <h2>Kiemelt termékek</h2>
+  <div class="product-grid" id="product-grid">
+    <div class="product-card">
+      <div class="card-img">💍</div>
+      <div class="card-body">
+        <div class="card-title">Ezüst gyűrű</div>
+        <div class="card-price">4 900 Ft</div>
+        <button class="btn-cart" onclick="addToCart('Ezüst gyűrű')">Kosárba</button>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="card-img">📿</div>
+      <div class="card-body">
+        <div class="card-title">Kézzel font nyaklánc</div>
+        <div class="card-price">6 500 Ft</div>
+        <button class="btn-cart" onclick="addToCart('Kézzel font nyaklánc')">Kosárba</button>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="card-img">🔮</div>
+      <div class="card-body">
+        <div class="card-title">Ametiszt fülbevaló</div>
+        <div class="card-price">3 200 Ft</div>
+        <button class="btn-cart" onclick="addToCart('Ametiszt fülbevaló')">Kosárba</button>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="card-img">🌸</div>
+      <div class="card-body">
+        <div class="card-title">Rozé arany karkötő</div>
+        <div class="card-price">8 900 Ft</div>
+        <button class="btn-cart" onclick="addToCart('Rozé arany karkötő')">Kosárba</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  &copy; 2026 ÉkszerShop – Minden jog fenntartva
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════
+// SUPABASE INICIALIZÁLÁS
+// ══════════════════════════════════════════════════
+const { createClient } = supabase;
+let supabaseClient;
+
+try {
+  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (!SUPABASE_URL.includes('ILLESZD_BE')) {
+    document.getElementById('config-banner').classList.add('hidden');
+  }
+} catch(e) {
+  console.error('Supabase init hiba:', e);
+}
+
+// ══════════════════════════════════════════════════
+// AUTH ÁLLAPOT FIGYELÉSE
+// Minden oldalbetöltésnél megnézi: be van-e jelentkezve?
+// ══════════════════════════════════════════════════
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+      const email = session.user.email;
+      document.getElementById('nav-user').textContent = '👤 ' + email;
+      document.getElementById('nav-btn').textContent = 'Kijelentkezés';
+      document.getElementById('nav-btn').onclick = handleLogout;
+      closeAuth();
+    } else {
+      document.getElementById('nav-user').textContent = 'Nem vagy bejelentkezve';
+      document.getElementById('nav-btn').textContent = 'Bejelentkezés';
+      document.getElementById('nav-btn').onclick = openAuth;
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+// AUTH MODAL KEZELÉSE
+// ══════════════════════════════════════════════════
+let isRegisterMode = false;
+
+function openAuth() {
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  document.getElementById('auth-message').textContent = '';
+}
+function closeAuth() {
+  document.getElementById('auth-overlay').classList.add('hidden');
+}
+function toggleAuthMode() {
+  isRegisterMode = !isRegisterMode;
+  document.getElementById('auth-title').textContent = isRegisterMode ? 'Regisztráció' : 'Bejelentkezés';
+  document.getElementById('auth-submit-btn').textContent = isRegisterMode ? 'Fiók létrehozása' : 'Belépés';
+  document.getElementById('auth-switch-text').textContent = isRegisterMode ? 'Már van fiókod?' : 'Nincs még fiókod?';
+  document.getElementById('auth-message').textContent = '';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const msgEl = document.getElementById('auth-message');
+
+  if (!email || !password) { msgEl.textContent = 'Töltsd ki mindkét mezőt!'; return; }
+
+  if (!supabaseClient || SUPABASE_URL.includes('ILLESZD_BE')) {
+    msgEl.textContent = '⚠️ Állítsd be előszőr a Supabase kulcsokat!';
+    return;
+  }
+
+  msgEl.textContent = 'Folyamatban...';
+
+  if (isRegisterMode) {
+    // ── REGISZTRÁCIÓ ──
+    const { error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) {
+      msgEl.textContent = '❌ Hiba: ' + error.message;
+    } else {
+      msgEl.textContent = '✅ Erősítsd meg az e-mail fiókodban a regisztrációt!';
+    }
+  } else {
+    // ── BEJELENTKEZÉS ──
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) { msgEl.textContent = '❌ Hibás e-mail vagy jelszó!'; }
+    // Ha sikeres → az onAuthStateChange automatikusan kezeli
+  }
+}
+
+async function handleLogout() {
+  await supabaseClient.auth.signOut();
+}
+
+// ══════════════════════════════════════════════════
+// KOSÁR (egyszerű példa)
+// ══════════════════════════════════════════════════
+const cart = [];
+function addToCart(name) {
+  if (!supabaseClient) return;
+  supabaseClient.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      alert('A kosárhoz be kell jelentkezned!');
+      openAuth();
+      return;
+    }
+    cart.push(name);
+    alert('✅ ' + name + ' kosárba téve! (Kosár: ' + cart.length + ' tétel)');
+    // Ide írhatod a Supabase 'cart' táblába mentést:
+    // await supabaseClient.from('cart').insert({ user_id: data.session.user.id, product_name: name });
+  });
+}
+
+// ESC gombra bezárja a modalt
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAuth(); });
+</script>
+</body>
+</html>
